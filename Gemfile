@@ -1,52 +1,76 @@
 source 'https://rubygems.org'
 
 # Core gems
-gem 'rails', '3.2.11'
+gem 'rails', '3.2.17'
 
-group :development, :test do  
-  gem 'sqlite3'
-  gem 'guard'
-  gem 'guard-rspec'
-end
 # Database adapters
-gem 'pg', '0.12.2'
-# Uncomment this is you want to use sqlite locally
-# gem 'sqlite3'
+gem 'pg'
 
-# Auth/Cloudfuji gems
+# Uncomment next line when using MySQL database
+#gem 'mysql2'
+
+# Auth gems
 gem 'devise'
-gem 'devise_cloudfuji_authenticatable'
-gem 'cloudfuji'
+gem 'cancan'
 
 # Server/transport gems
 gem 'thin'
-gem '_bushido-faye', '0.8.2'
+gem 'faye'
 
 # Helper gems
 gem 'kaminari'
 gem 'aws-sdk'
-gem 'cloudfuji_paperclip'
+gem 'paperclip'
 gem 'remotipart'
 gem 'jquery-rails'
-
-# Making the world a better, more stable place
-gem 'airbrake'
+gem 'enumerize'
+gem 'arel'
+gem 'tzinfo'
 
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
-  gem 'sass-rails',   '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
+  gem 'sass-rails'
+  gem 'coffee-rails'
   gem 'bourbon'
-  gem 'execjs'   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
+  gem 'execjs'
   gem 'eco'
-  gem 'uglifier', '>= 1.0.3'
+  gem 'uglifier'
+  gem 'bootstrap-sass'
+  gem 'sass', '3.2.13'
+  gem 'gemoji'
 end
 
-# Test gems, obviously
+group :production do
+  gem 'kandan-count'
+end
+
+group :development do
+  gem 'kandan-count-dev'
+  gem 'pry-rails'
+  gem 'quiet_assets'
+  gem 'awesome_print'
+  gem 'better_errors'
+  gem 'binding_of_caller'
+  gem 'debugger'
+end
+
 group :test do
+  gem 'faker'
   gem 'rspec-rails'
   gem 'shoulda-matchers'
-  gem 'factory_girl_rails', '~> 3.0'
-  gem 'jasmine', :git => "https://github.com/pivotal/jasmine-gem.git", :branch => "1.2.rc1", :group => [:development, :test]
+  gem 'factory_girl_rails'
+  gem 'simplecov', :require => false
+  gem 'coveralls', :require => false
+  gem 'poltergeist'
+  gem 'launchy'
+  gem 'capybara'
+end
+
+group :development, :test do
+  gem 'sqlite3'
+  gem 'guard'
+  gem 'guard-rspec'
+  gem 'database_cleaner'
+  gem 'jasmine'
 end

@@ -11,11 +11,15 @@
 // GO AFTER THE REQUIRES BELOW.
 //
 //= require jquery
-//= require jquery-ui
 //= require jquery_ujs
 //= require lib/jquery.filedrop
 //= require lib/underscore
+//= require lib/underscore.string
 //= require lib/backbone
 //= require backbone/kandan
 //= require_tree .
-
+//= stub admin/admin
+//= require lib/jquery.atwho
+//= require lib/jquery.caret
+//= require lib/jquery.inputHistory
+//= require bootstrap

@@ -26,8 +26,6 @@ module Kandan
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
-    config.assets.initialize_on_precompile = false
-
     # Custom directories with classes and modules you want to be autoloadable.
     # config.autoload_paths += %W(#{config.root}/extras)
 
@@ -52,6 +50,8 @@ module Kandan
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
 
+    config.assets.precompile += ["admin/admin.js", "admin.css"]
+
     # Use SQL instead of Active Record's schema dumper when creating the database.
     # This is necessary if your schema can't be completely dumped by the schema dumper,
     # like if you have constraints or database-specific column types
@@ -61,7 +61,8 @@ module Kandan
     # This will create an empty whitelist of attributes available for mass-assignment for all models
     # in your app. As such, your models will need to explicitly whitelist or blacklist accessible
     # parameters by using an attr_accessible or attr_protected declaration.
-    # config.active_record.whitelist_attributes = true
+    config.active_record.whitelist_attributes = true
+    config.active_record.mass_assignment_sanitizer = :strict
 
     # Enable the asset pipeline
     config.assets.enabled = true

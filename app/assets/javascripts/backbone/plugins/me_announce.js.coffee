@@ -1,10 +1,13 @@
 class Kandan.Plugins.MeAnnounce
 
   @options:
-    regex: /^&#x2F;me /
+    regex: /^&#x2F;me( |$)/
 
   @init: ()->
-    Kandan.Modifiers.register @options.regex, (message, state) =>
-      actor = message.user.first_name || message.user.email
-      message.content = message.content.replace @options.regex, "#{actor} "
-      return Kandan.Helpers.Activities.buildFromBaseTemplate(message)
+    Kandan.Modifiers.register @options.regex, (message, activity) =>
+      actor = activity.user.username || activity.user.email
+      if message.length == 8 || message.length == 9
+        message = "#{actor} whistles in the wind."
+      else
+        message = message.replace @options.regex, "#{actor} "
+      return message

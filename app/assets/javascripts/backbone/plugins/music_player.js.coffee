@@ -7,13 +7,24 @@ class Kandan.Plugins.MusicPlayer
   @stopRegex: /^&#x2F;stop/
   @resumeRegex: /^&#x2F;resume/
   @localSongData: false
+  @sounds: {
+    channel: 'ding.wav'
+    attention: 'threetone-alert.wav'
+  }
 
-
-  @playTemplate:   _.template('<strong><a class="audio-play">playing</a> <a target="_blank" href="<%- url %>"><%- url %></a></strong>')
-  @stopTemplate:   _.template('<strong><a class="audio-play">stopping</a> the music.')
-  @resumeTemplate: _.template('<strong><a class="audio-play">resuming</a> the music.')
+  @playTemplate:   _.template('<a class="audio-play" target="_blank" href="<%- soundUrl %>"><i>:sound: play <%- url %></i></a>')
+  @stopTemplate:   _.template('<i>:mute: stop the music.</i>')
+  @resumeTemplate: _.template('<i>:sound: resume the music.</i>')
   @songTemplate:   _.template('<li><%= song.split("/").pop() %></li>')
 
+  @attachClicks: =>
+    _this = this
+    $(document).delegate('.audio-play', 'click', (e) ->
+      e.preventDefault()
+      soundUrl = $(this).attr('href')
+      channelId = _this.currentChannel()
+      _this.playUrl(channelId, soundUrl)
+    )
 
   @setError: (errorMessage)->
     console.log "music player error", errorMessage
@@ -60,37 +71,37 @@ class Kandan.Plugins.MusicPlayer
 
 
   @registerPlayModifier: ()->
-    Kandan.Modifiers.register @playRegex, (message, state) =>
-      url = $.trim(message.content.substr(message.content.indexOf(" ") + 1));
-      if true and Kandan.Data.Channels.activeChannelId()? # and state == Kandan.Helpers.Activities.ACTIVE_STATE commented out because state == undefined for some reason
-        rawInput  = Kandan.Helpers.Utils.unescape(url)
-        soundUrl  = null
-        soundUrl  = @localSounds(rawInput)
-        soundUrl ?= rawInput
+    Kandan.Modifiers.register @playRegex, (message, activity) =>
+      url = $.trim(message.substr(message.indexOf(" ") + 1));
+      rawInput  = Kandan.Helpers.Utils.unescape(url)
+      soundUrl  = null
+      soundUrl  = @localSounds(rawInput)
+      soundUrl ?= rawInput
 
-        @playUrl(message.channel_id, soundUrl)
+      if true and Kandan.Data.Channels.activeChannelId()?
+        @playUrl(activity.channel_id, soundUrl)
       else
         console.log "Not playing stale song"
 
-      message.content = @playTemplate({url: url})
-      return Kandan.Helpers.Activities.buildFromBaseTemplate message
+      message = @playTemplate({url: url, soundUrl: soundUrl})
+      return message #Kandan.Helpers.Activities.buildFromBaseTemplate message
 
   @registerStopModifier: ()->
-    Kandan.Modifiers.register @stopRegex, (message, state) =>
-      url = $.trim(message.content.substr(message.content.indexOf(" ") + 1));
+    Kandan.Modifiers.register @stopRegex, (message, activity) =>
+      url = $.trim(message.substr(message.indexOf(" ") + 1));
       if true and Kandan.Data.Channels.activeChannelId()?
-        @stopSound(message.channel_id)
+        @stopSound(activity.channel_id)
 
-      message.content = @stopTemplate()
-      return Kandan.Helpers.Activities.buildFromBaseTemplate message
+      message = @stopTemplate()
+      return message
 
   @registerResumeModifier: ()->
-    Kandan.Modifiers.register @resumeRegex, (message, state) =>
+    Kandan.Modifiers.register @resumeRegex, (message, activity) =>
       if true and Kandan.Data.Channels.activeChannelId()?
-        @play(message.channel_id)
+        @play(activity.channel_id)
 
-      message.content = @resumeTemplate()
-      return Kandan.Helpers.Activities.buildFromBaseTemplate message
+      message = @resumeTemplate()
+      return message
 
 
   # TODO display error about song not being added by creating an activity locally
@@ -110,14 +121,12 @@ class Kandan.Plugins.MusicPlayer
     Kandan.Store.get @pluginId, callbacks
 
   @localFileUrl: (fileName) ->
-    "http://#{ window.location.hostname }:#{ window.location.port }/sounds/#{ fileName }"
+    "//#{ window.location.hostname }:#{ window.location.port }/sounds/#{ fileName }"
 
   @localSounds: (name) ->
     sounds = {
-      'claps'  : @localFileUrl('golfclap.mp3')
-      'cheers' : @localFileUrl('cheers.mp3')
-      'ding'   : @localFileUrl('ding.wav')
-      'gong'   : @localFileUrl('gong.mp3')
+      'threetone-alert'  : @localFileUrl('threetone-alert.wav')
+      'ding'             : @localFileUrl('ding.wav')
       }
 
     sounds[name]
@@ -170,8 +179,10 @@ class Kandan.Plugins.MusicPlayer
     if @audioChannel(channelId)?
       @unmute(channelId)
 
-  @playAudioNotice: ->
-    url    = @localFileUrl('ding.wav')
+  @playAudioNotice: (type)->
+    console.log "told to play for: #{type}"
+    sound  = @sounds[type] || 'ding.wav'
+    url    = @localFileUrl(sound)
     player = $('.audio_private')[0]
     player.setAttribute('src', url)
     player.play()

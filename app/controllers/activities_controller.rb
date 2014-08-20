@@ -1,4 +1,5 @@
 class ActivitiesController < ApplicationController
+  before_filter :authenticate_user_from_token!, :only => :create
   before_filter :authenticate_user!
 
   def index
@@ -26,6 +27,8 @@ class ActivitiesController < ApplicationController
     # NOTE if the action is accessed then there's definitely activities, so skip check for #first to be nil
     more_activities = first_activity_id < (activities.last.try(:id).presence || 1)
 
+    activities.each { |a| a.user ||= User.deleted_user }
+
     respond_to do |format|
       format.json { render :text => {:activities => activities.reverse, :more_activities => more_activities }.to_json(:include => :user) }
     end
@@ -34,12 +37,11 @@ class ActivitiesController < ApplicationController
   def create
     @activity = Channel.find(params[:channel_id]).activities.build(params[:activity])
     @activity.user_id = current_user.id if @activity.action == "message"
-    if @activity.save
-      respond_to do |format|
+
+    respond_to do |format|
+      if @activity.save
         format.json { render :json => @activity, :status => :created }
-      end
-    else
-      respond_to do |format|
+      else
         format.json { render :json => @activity.errors, :status => :unprocessable_entity }
       end
     end
